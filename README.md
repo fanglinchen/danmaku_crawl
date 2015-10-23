@@ -9,5 +9,7 @@ python bilibili.py av3087062
 
 
 aid: av id
+
 cid: comment(danmu) id 
+
 pid: page id 
