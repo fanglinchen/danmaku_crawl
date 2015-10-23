@@ -159,7 +159,7 @@ def GetAllComment(aid, order = None):
     if commentList.page == 1:
         return commentList
     for p in range(2,commentList.page+1):
-        t_commentlist = GetComment(aid=aid,pagesize=MaxPageSize,page=p,ver=ver,order=order)
+        t_commentlist = GetComment(aid=aid,pagesize=MaxPageSize,page=p,order=order)
         for liuyan in t_commentlist.comments:
             commentList.comments.append(liuyan)
         time.sleep(0.5)
@@ -290,39 +290,43 @@ def CrawlVideo(av_number, appkey, folder, AppSecret=None):
     video = GetVideoInfo(aid,appkey,pid,AppSecret)
     cid = video.cid
     print "aid:"+str(aid)
-    print "cid:"+str(video.cid)
+    print "cid:"+str(cid)
     print "pid:"+str(pid)
+    
+    meta_file = codecs.open('%s/meta.csv' % folder, 'w', 'utf-8')
+    
+    meta_line = str(video.title) + "," + str(video.guankan) +"," + str(video.commentNumber) + "," + str(video.danmu) +"," + str(video.shoucang)+","+str(video.description)+"\n"
+    meta_file.write(meta_line)
+    meta_file.close()
+    
+    commentList = GetAllComment(aid)
+    comment_file = codecs.open('%s/comment.csv' % folder, 'w', 'utf-8')
+    for liuyan in commentList.comments:
+        comment_line = str(liuyan.lv)+","+str(liuyan.post_user.name)+','+str(liuyan.msg)+"\n"
+        comment_file.write(comment_line)
+        
+    comment_file.close()
+    
+    print "片名:"+video.title
+    print "播放数:"+ video.guankan
+    print "评论数:"+video.commentNumber
+    print "收藏数:"+video.shoucang
+    print "介绍:"+video.description
+    
     # single video
     if video.page == 1:
-        print video.title
+        danmu_file = codecs.open('%s/danmu.csv' % folder, 'w', 'utf-8')
+        for danmu in ParseDanmuku(cid):
+            # print danmu.t_video,danmu.t_stamp,danmu.content, danmu.mid_crc, danmu.danmu_type, danmu.danmu_color
+            danmu_line = str(danmu.t_video) + "," + str(danmu.t_stamp) + "," + str(danmu.content) + "," + str(danmu.mid_crc) + "," + str(danmu.danmu_type) + "," + str(danmu.danmu_color) + "\n"
+            danmu_file.write(danmu_line)
+        danmu_file.close()
+        
+        
     # multiple videos     
     else:
-        print "multiple videos"
-        
-        video = GetVideoInfo(aid,appkey,pid,AppSecret)
-        print "片名:"+video.title
-        print "播放数:"+ video.guankan
-        print "评论数:"+video.commentNumber
-        print "弹幕数:"+video.danmu
-        print "收藏数:"+video.shoucang
-        print "介绍:"+video.description
-        meta_file = codecs.open('%s/meta.csv' % folder, 'w', 'utf-8')
-        
-        meta_line = str(video.title) + "," + str(video.guankan) +"," + str(video.commentNumber) + "," + str(video.danmu) +"," + str(video.shoucang)+","+str(video.description)+"\n"
-        meta_file.write(meta_line)
-        meta_file.close()
-        
-        commentList = GetAllComment(aid)
-        comment_file = codecs.open('%s/comment.csv' % folder, 'w', 'utf-8')
-        for liuyan in commentList.comments:
-            comment_line = str(liuyan.lv)+","+str(liuyan.post_user.name)+','+str(liuyan.msg)+"\n"
-            comment_file.write(comment_line)
-            
-        comment_file.close()
-            
-            
         for i in range(0,video.page):
-            danmu_file = codecs.open('%s/%s.csv' % (folder, i), 'w', 'utf-8')
+            danmu_file = codecs.open('%s/danmu_%s.csv' % (folder, i), 'w', 'utf-8')
             for danmu in ParseDanmuku(cid):
                 # print danmu.t_video,danmu.t_stamp,danmu.content, danmu.mid_crc, danmu.danmu_type, danmu.danmu_color
                 danmu_line = str(danmu.t_video) + "," + str(danmu.t_stamp) + "," + str(danmu.content) + "," + str(danmu.mid_crc) + "," + str(danmu.danmu_type) + "," + str(danmu.danmu_color) + "\n"
