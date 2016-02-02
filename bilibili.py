@@ -364,7 +364,6 @@ if __name__ == "__main__":
     
     # python bilibili.py av314
     
-    # 接受参数 av****** 并创建 xml 保存目录
     av_number = sys.argv[1]
     av_folder = r'./%s' % av_number
     if os.path.exists(av_folder):
